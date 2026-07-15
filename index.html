@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
+<html lang="pt-BR"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="robots" content="noindex, nofollow">
 <title>Eco Vic Ville · Gestão 3D</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&amp;family=IBM+Plex+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
 <style>
   :root{
     --ink:#14161A;
@@ -175,12 +174,23 @@
   .campo{display:flex;flex-direction:column;gap:6px}
   .campo label{font-size:12px;font-weight:700;letter-spacing:.02em}
   .campo .valor-campo{
+    width:100%;font-family:var(--font-display);
     font-size:14px;font-weight:600;
     border:var(--line);border-radius:8px;
     padding:11px 13px;background:#EFF1F3;color:#1F2937;
-    min-height:44px;line-height:1.4;word-break:break-word;
+    outline:none;line-height:1.4;
+    transition:box-shadow .12s, transform .12s, border-color .12s, background .12s;
   }
-  .campo .valor-campo:empty::before{content:'—';color:#9CA3AF;font-weight:400}
+  .campo .valor-campo::placeholder{color:#9CA3AF;font-weight:400}
+  .campo .valor-campo:read-only{cursor:default}
+  /* Modo adm: campos liberados e destacados */
+  body.modo-admin .campo .valor-campo{
+    background:var(--paper);border-color:var(--admin);
+    box-shadow:3px 3px 0 var(--admin);
+  }
+  body.modo-admin .campo .valor-campo:focus{
+    transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--admin);
+  }
 
   /* ---------- CONTATOS (confidencial) ---------- */
   #secao-contatos{display:flex;flex-direction:column;gap:8px}
@@ -211,6 +221,60 @@
     display:none;font-size:12px;color:var(--muted);text-align:center;
     padding:10px;border:1.5px dashed #D1D5DB;border-radius:8px;
   }
+
+  /* --- Edição de contatos (só no modo adm) --- */
+  .contato-row .c-edit{display:none;flex:1;gap:6px;min-width:0}
+  body.modo-admin .contato-row .c-edit{display:flex}
+  body.modo-admin .contato-row .c-info{display:none}
+  .contato-row .c-edit input{
+    font-family:var(--font-display);font-size:12.5px;font-weight:600;
+    border:1.5px solid var(--admin);border-radius:7px;
+    padding:8px 9px;background:var(--paper);outline:none;min-width:0;
+  }
+  .contato-row .c-edit input:focus{box-shadow:2px 2px 0 var(--admin)}
+  .contato-row .c-edit .e-nome{flex:1.25}
+  .contato-row .c-edit .e-zap{flex:1;font-family:var(--font-mono);font-size:11.5px}
+  .contato-row .c-del{
+    display:none;border:1.5px solid var(--ink);border-radius:7px;background:var(--panel);
+    font-weight:800;padding:8px 10px;cursor:pointer;color:#B91C1C;line-height:1;
+  }
+  body.modo-admin .contato-row .c-del{display:block}
+  #btn-add-contato{
+    display:none;font-family:var(--font-mono);font-size:11px;font-weight:600;
+    border:1.5px dashed var(--admin);border-radius:7px;color:var(--admin);
+    background:none;padding:9px;cursor:pointer;
+  }
+  body.modo-admin #btn-add-contato{display:block}
+
+  .btn-salvar{background:var(--accent);color:#fff;display:none}
+  body.modo-admin .btn-salvar{display:flex}
+
+  #btn-importar{
+    display:none;width:100%;margin-top:12px;
+    background:var(--ocupado);color:#fff;font-size:13px;padding:11px 14px;
+  }
+  body.modo-admin #btn-importar{display:flex}
+  #import-resumo{
+    display:none;margin-top:8px;padding:10px 12px;
+    border:1.5px solid var(--ink);border-radius:8px;background:var(--panel);
+    font-family:var(--font-mono);font-size:10.5px;line-height:1.6;
+  }
+  #import-resumo.on{display:block}
+  #import-resumo b{font-weight:600}
+  #import-resumo .ok{color:var(--ocupado)}
+  #import-resumo .warn{color:#B45309}
+  #import-resumo ul{margin:4px 0 0 14px;padding:0}
+
+  #btn-exportar{
+    display:none;width:100%;margin-top:12px;
+    background:var(--admin);color:#fff;font-size:13px;padding:11px 14px;
+  }
+  body.modo-admin #btn-exportar{display:flex}
+  #aviso-export{
+    display:none;font-size:10.5px;color:var(--muted);line-height:1.5;
+    margin-top:7px;text-align:center;
+  }
+  body.modo-admin #aviso-export{display:block}
 
   .acoes{display:flex;flex-direction:column;gap:10px;margin-top:4px}
   .btn{
@@ -342,10 +406,10 @@
   }
 </style>
 </head>
-<body>
+<body class="">
 
   <!-- ============ PORTÃO DE ENTRADA ============ -->
-  <div id="portao">
+  <div id="portao" class="">
     <div class="portao-card">
       <div class="portao-head">
         <div class="eyebrow">Condomínio</div>
@@ -354,11 +418,11 @@
       </div>
       <div class="portao-body">
         <div id="portao-passo"></div>
-        <button id="portao-voltar" hidden>← voltar</button>
+        <button id="portao-voltar" hidden="">← voltar</button>
       </div>
       <div class="portao-foot">
         <button id="portao-sindico">🔑 Área adm</button>
-        <div id="portao-senha">
+        <div id="portao-senha" class="">
           <input id="portao-inp" type="password" placeholder="Senha de acesso" autocomplete="off">
           <button id="portao-entrar">Entrar</button>
         </div>
@@ -368,7 +432,7 @@
 
   <!-- ============ CENÁRIO 3D ============ -->
   <div id="viewport">
-    <canvas id="canvas3d"></canvas>
+    <canvas id="canvas3d" width="1457" height="912" style="cursor: grab;"></canvas>
     <div class="legend">
       <span><i class="dot" style="background:#2F9E5B"></i> Ocupado</span>
       <span><i class="dot" style="background:#F0B429"></i> Disponível</span>
@@ -388,7 +452,7 @@
       <div class="stats">
         <span><b>3</b> blocos</span>
         <span><b id="stat-total">152</b> unidades</span>
-        <span><b id="stat-ocupadas">0</b> ocupadas</span>
+        <span><b id="stat-ocupadas">77</b> ocupadas</span>
       </div>
     </div>
 
@@ -412,13 +476,13 @@
         </div>
 
         <div class="campo">
-          <label>Morador(es) na unidade</label>
-          <div class="valor-campo" id="val-morador"></div>
+          <label for="inp-morador">Morador(es) na unidade</label>
+          <input class="valor-campo" id="inp-morador" type="text" placeholder="Sem morador cadastrado" autocomplete="off">
         </div>
 
         <div class="campo">
-          <label>Vaga de garagem</label>
-          <div class="valor-campo" id="val-vaga"></div>
+          <label for="inp-vaga">Vaga de garagem</label>
+          <input class="valor-campo" id="inp-vaga" type="text" placeholder="—" autocomplete="off">
         </div>
 
         <div id="secao-contatos">
@@ -428,9 +492,11 @@
           </div>
           <div id="lista-contatos"></div>
           <div id="sem-contatos">Nenhum contato cadastrado nesta unidade.</div>
+          <button id="btn-add-contato" type="button">+ adicionar contato</button>
         </div>
 
         <div class="acoes">
+          <button class="btn btn-salvar" id="btn-salvar">💾 Salvar alterações</button>
           <button class="btn btn-limpar" id="btn-limpar">Limpar seleção</button>
         </div>
       </div>
@@ -438,29 +504,38 @@
     </div>
 
     <div class="painel-footer">
-      <button id="link-admin">🔒 Área do síndico</button>
+      <button id="link-admin">🔓 Área adm ativa — clique para sair</button>
       <div id="form-senha">
         <input id="inp-senha" type="password" placeholder="Senha de acesso" autocomplete="off">
         <button id="btn-entrar">Entrar</button>
       </div>
+      <button class="btn" id="btn-importar">📊 Importar planilha (.xlsx / .csv)</button>
+      <input type="file" id="arq-planilha" accept=".xlsx,.xls,.csv" hidden="">
+      <div id="import-resumo" class=""></div>
+      <button class="btn" id="btn-exportar" disabled="">Gerando...</button>
+      <div id="aviso-export">
+        Gera um arquivo atualizado, com os contatos recriptografados.
+        Substitua o <b>index.html</b> no GitHub por ele.
+      </div>
     </div>
   </aside>
 
-  <div id="toast"></div>
+  <div id="toast" class=""></div>
 
   <!-- Dados públicos das unidades (morador, vaga, status) -->
   <script type="application/json" id="dados-publicos">
-{"apartamentos": {"BL3-104": {"morador": "Alessandra", "vaga": "104"}, "BL2-204": {"morador": "Amanda e Luan", "vaga": "56"}, "BL3-1104": {"morador": "Anderson e Jussara", "vaga": "144"}, "BL1-201": {"morador": "Andrea e Erivan", "vaga": "10"}, "BL3-703": {"morador": "Antonio eJessica", "vaga": "127"}, "BL1-1204": {"morador": "Barbara", "vaga": "48"}, "BL2-1101": {"morador": "Beatriz e Jorge", "vaga": "89"}, "BL3-203": {"morador": "Bianca e Jonatham", "vaga": "107"}, "BL1-1004": {"morador": "Bruna e Diego", "vaga": "40"}, "BL3-902": {"morador": "Carlos e Beatriz", "vaga": "134"}, "BL3-301": {"morador": "Carlos Henrique", "vaga": "109"}, "BL3-803": {"morador": "Cida e Luiz", "vaga": "131"}, "BL2-103": {"morador": "Clau, Rafa e Amora 🐶", "vaga": "51"}, "BL3-103": {"morador": "Cristiano e Luciana", "vaga": "103"}, "BL2-402": {"morador": "Daniel e Lana", "vaga": "62"}, "BL1-1203": {"morador": "Daniele", "vaga": "47"}, "BL3-1203": {"morador": "Daniele Oliveira", "vaga": "147"}, "BL1-902": {"morador": "Danilo e Leila", "vaga": "34"}, "BL2-1103": {"morador": "Dayane e Natália", "vaga": "91"}, "BL1-204": {"morador": "Douglas e Gabriela", "vaga": "2-PCD"}, "BL2-302": {"morador": "Eduardo e Joana", "vaga": "58"}, "BL2-102": {"morador": "Eliana e Reis", "vaga": "50"}, "BL3-1301": {"morador": "Elyermeson e Maria", "vaga": "149"}, "BL2-801": {"morador": "Emerson e Elisangela", "vaga": "77-IDOSO"}, "BL2-201": {"morador": "Erika e Luã", "vaga": "53"}, "BL3-403": {"morador": "Esther e Lucas", "vaga": "115"}, "BL1-804": {"morador": "Fabricio", "vaga": "32"}, "BL3-503": {"morador": "Felipe vieira", "vaga": "119"}, "BL1-502": {"morador": "Fernanda", "vaga": "20"}, "BL3-201": {"morador": "Fernando", "vaga": "105"}, "BL1-802": {"morador": "Gabriel Meira", "vaga": "30"}, "BL2-703": {"morador": "Gabriela Fernandes", "vaga": "75-IDOSO"}, "BL2-804": {"morador": "Gabriele e Lucas", "vaga": "80"}, "BL1-701": {"morador": "Gabriele Santos e Luan", "vaga": "25"}, "BL3-504": {"morador": "Gizeli e Carlos", "vaga": "120"}, "BL3-802": {"morador": "Igor e Helen", "vaga": "130"}, "BL2-1304": {"morador": "Ivan e Andresa", "vaga": "100"}, "BL1-202": {"morador": "Janete", "vaga": "11"}, "BL2-1003": {"morador": "Jaque e Jose", "vaga": "87"}, "BL3-1002": {"morador": "Jaqueline", "vaga": "138"}, "BL1-504": {"morador": "Jeane", "vaga": "5-PCD"}, "BL2-304": {"morador": "Jéssika e José", "vaga": "60"}, "BL2-401": {"morador": "Jose Nelio e Edna", "vaga": "61"}, "BL3-404": {"morador": "Lais e Samuel", "vaga": "116"}, "BL2-1301": {"morador": "Larissa", "vaga": "97"}, "BL3-1101": {"morador": "Leandro e Cristiany", "vaga": "141"}, "BL2-802": {"morador": "Liliam", "vaga": "78-IDOSO"}, "BL3-303": {"morador": "Luiz Fernando", "vaga": "111"}, "BL1-1002": {"morador": "Luiza e Thiago", "vaga": "38"}, "BL1-1104": {"morador": "Marcia", "vaga": "44"}, "BL1-1102": {"morador": "Matheus", "vaga": "42"}, "BL2-203": {"morador": "Micaelle e Felipe", "vaga": "55"}, "BL3-903": {"morador": "Mikalle", "vaga": "135"}, "BL3-502": {"morador": "Naiane e Adailson", "vaga": "118"}, "BL1-602": {"morador": "Naiara e José", "vaga": "23"}, "BL1-903": {"morador": "Nataly", "vaga": "35"}, "BL1-301": {"morador": "Nathalia e Nathan", "vaga": "13"}, "BL3-1202": {"morador": "Nattan e kimberly", "vaga": "146"}, "BL3-702": {"morador": "Pamela", "vaga": "126"}, "BL1-904": {"morador": "Patricia", "vaga": "36"}, "BL3-1201": {"morador": "Raisa e Estevão", "vaga": "145"}, "BL3-401": {"morador": "Regiane", "vaga": "113"}, "BL2-301": {"morador": "Renato e Paula", "vaga": "57"}, "BL1-1201": {"morador": "Rita", "vaga": "45"}, "BL3-1303": {"morador": "Rubens Lourenço e Rosângela", "vaga": "151"}, "BL1-503": {"morador": "Silmara", "vaga": "21"}, "BL2-1302": {"morador": "Talita e Magno", "vaga": "98"}, "BL1-704": {"morador": "Tamires Cristovão", "vaga": "28"}, "BL2-502": {"morador": "Vitor Manoel", "vaga": "66"}, "BL2-504": {"morador": "Wellington", "vaga": "68"}, "BL2-1001": {"morador": "Wesley & Monique", "vaga": "85"}, "BL1-703": {"morador": "Wesley e Valeria", "vaga": "27"}, "BL1-601": {"morador": "Wilson Amaral", "vaga": "22"}, "BL1-1001": {"morador": "", "vaga": "37"}, "BL1-1003": {"morador": "", "vaga": "39"}, "BL1-101": {"morador": "", "vaga": "7"}, "BL1-102": {"morador": "", "vaga": "8"}, "BL1-103": {"morador": "", "vaga": "9"}, "BL1-104": {"morador": "", "vaga": "1-PCD"}, "BL1-1101": {"morador": "", "vaga": "41"}, "BL1-1103": {"morador": "", "vaga": "43"}, "BL1-1202": {"morador": "", "vaga": "46"}, "BL1-203": {"morador": "", "vaga": "12"}, "BL1-302": {"morador": "", "vaga": "14"}, "BL1-303": {"morador": "", "vaga": "15"}, "BL1-304": {"morador": "", "vaga": "3-PCD"}, "BL1-401": {"morador": "", "vaga": "16"}, "BL1-402": {"morador": "", "vaga": "17"}, "BL1-403": {"morador": "", "vaga": "18"}, "BL1-404": {"morador": "", "vaga": "4-PCD"}, "BL1-501": {"morador": "", "vaga": "19"}, "BL1-603": {"morador": "", "vaga": "24"}, "BL1-604": {"morador": "", "vaga": "6-PCD"}, "BL1-702": {"morador": "", "vaga": "26"}, "BL1-801": {"morador": "", "vaga": "29"}, "BL1-803": {"morador": "", "vaga": "31"}, "BL1-901": {"morador": "", "vaga": "33"}, "BL2-1002": {"morador": "", "vaga": "86"}, "BL2-1004": {"morador": "", "vaga": "88"}, "BL2-101": {"morador": "", "vaga": "49"}, "BL2-104": {"morador": "", "vaga": "52"}, "BL2-1102": {"morador": "", "vaga": "90"}, "BL2-1104": {"morador": "", "vaga": "92"}, "BL2-1201": {"morador": "", "vaga": "93"}, "BL2-1202": {"morador": "", "vaga": "94"}, "BL2-1203": {"morador": "", "vaga": "95"}, "BL2-1204": {"morador": "", "vaga": "96"}, "BL2-1303": {"morador": "", "vaga": "99"}, "BL2-202": {"morador": "", "vaga": "54"}, "BL2-303": {"morador": "", "vaga": "59"}, "BL2-403": {"morador": "", "vaga": "63"}, "BL2-404": {"morador": "", "vaga": "64"}, "BL2-501": {"morador": "", "vaga": "65"}, "BL2-503": {"morador": "", "vaga": "67"}, "BL2-601": {"morador": "", "vaga": "69"}, "BL2-602": {"morador": "", "vaga": "70"}, "BL2-603": {"morador": "", "vaga": "71-IDOSO"}, "BL2-604": {"morador": "", "vaga": "72-IDOSO"}, "BL2-701": {"morador": "", "vaga": "73-IDOSO"}, "BL2-702": {"morador": "", "vaga": "74-IDOSO"}, "BL2-704": {"morador": "", "vaga": "76-IDOSO"}, "BL2-803": {"morador": "", "vaga": "79"}, "BL2-901": {"morador": "", "vaga": "81"}, "BL2-902": {"morador": "", "vaga": "82"}, "BL2-903": {"morador": "", "vaga": "83"}, "BL2-904": {"morador": "", "vaga": "84"}, "BL3-1001": {"morador": "", "vaga": "137"}, "BL3-1003": {"morador": "", "vaga": "139"}, "BL3-1004": {"morador": "", "vaga": "140"}, "BL3-101": {"morador": "", "vaga": "101"}, "BL3-102": {"morador": "", "vaga": "102"}, "BL3-1102": {"morador": "", "vaga": "142"}, "BL3-1103": {"morador": "", "vaga": "143"}, "BL3-1204": {"morador": "", "vaga": "148"}, "BL3-1302": {"morador": "", "vaga": "150"}, "BL3-1304": {"morador": "", "vaga": "152"}, "BL3-202": {"morador": "", "vaga": "106"}, "BL3-204": {"morador": "", "vaga": "108"}, "BL3-302": {"morador": "", "vaga": "110"}, "BL3-304": {"morador": "", "vaga": "112"}, "BL3-402": {"morador": "", "vaga": "114"}, "BL3-501": {"morador": "", "vaga": "117"}, "BL3-601": {"morador": "", "vaga": "121"}, "BL3-602": {"morador": "", "vaga": "122"}, "BL3-603": {"morador": "", "vaga": "123"}, "BL3-604": {"morador": "", "vaga": "124"}, "BL3-701": {"morador": "", "vaga": "125"}, "BL3-704": {"morador": "", "vaga": "128"}, "BL3-801": {"morador": "", "vaga": "129"}, "BL3-804": {"morador": "", "vaga": "132"}, "BL3-901": {"morador": "", "vaga": "133"}, "BL3-904": {"morador": "", "vaga": "136"}}}
+{"apartamentos":{"BL1-101":{"morador":"","vaga":"7"},"BL1-102":{"morador":"","vaga":"8"},"BL1-103":{"morador":"","vaga":"9"},"BL1-104":{"morador":"","vaga":"1-PCD"},"BL1-201":{"morador":"Andrea e Erivan","vaga":"10"},"BL1-202":{"morador":"Janete","vaga":"11"},"BL1-203":{"morador":"","vaga":"12"},"BL1-204":{"morador":"Douglas e Gabriela","vaga":"2-PCD"},"BL1-301":{"morador":"Nathalia e Nathan","vaga":"13"},"BL1-302":{"morador":"","vaga":"14"},"BL1-303":{"morador":"","vaga":"15"},"BL1-304":{"morador":"","vaga":"3-PCD"},"BL1-401":{"morador":"","vaga":"16"},"BL1-402":{"morador":"","vaga":"17"},"BL1-403":{"morador":"Maisa Franco","vaga":"18"},"BL1-404":{"morador":"","vaga":"4-PCD"},"BL1-501":{"morador":"","vaga":"19"},"BL1-502":{"morador":"Fernanda","vaga":"20"},"BL1-503":{"morador":"Silmara","vaga":"21"},"BL1-504":{"morador":"Jeane","vaga":"5-PCD"},"BL1-601":{"morador":"Wilson Amaral","vaga":"22"},"BL1-602":{"morador":"Naiara e José","vaga":"23"},"BL1-603":{"morador":"","vaga":"24"},"BL1-604":{"morador":"","vaga":"6-PCD"},"BL1-701":{"morador":"Gabriele Santos e Luan","vaga":"25"},"BL1-702":{"morador":"","vaga":"26"},"BL1-703":{"morador":"Wesley e Valeria","vaga":"27"},"BL1-704":{"morador":"Tamires Cristovão","vaga":"28"},"BL1-801":{"morador":"","vaga":"29"},"BL1-802":{"morador":"Gabriel Meira","vaga":"30"},"BL1-803":{"morador":"Andre e Paolla","vaga":"31"},"BL1-804":{"morador":"Fabricio","vaga":"32"},"BL1-901":{"morador":"","vaga":"33"},"BL1-902":{"morador":"Danilo e Leila","vaga":"34"},"BL1-903":{"morador":"Nataly","vaga":"35"},"BL1-904":{"morador":"Patricia","vaga":"36"},"BL1-1001":{"morador":"","vaga":"37"},"BL1-1002":{"morador":"Luiza e Thiago","vaga":"38"},"BL1-1003":{"morador":"","vaga":"39"},"BL1-1004":{"morador":"Bruna e Diego","vaga":"40"},"BL1-1101":{"morador":"","vaga":"41"},"BL1-1102":{"morador":"Matheus","vaga":"42"},"BL1-1103":{"morador":"","vaga":"43"},"BL1-1104":{"morador":"Marcia","vaga":"44"},"BL1-1201":{"morador":"Rita","vaga":"45"},"BL1-1202":{"morador":"","vaga":"46"},"BL1-1203":{"morador":"Daniele","vaga":"47"},"BL1-1204":{"morador":"Barbara","vaga":"48"},"BL2-101":{"morador":"","vaga":"49"},"BL2-102":{"morador":"Eliana e Reis","vaga":"50"},"BL2-103":{"morador":"Clau, Rafa e Amora 🐶","vaga":"51"},"BL2-104":{"morador":"","vaga":"52"},"BL2-201":{"morador":"Erika e Luã","vaga":"53"},"BL2-202":{"morador":"","vaga":"54"},"BL2-203":{"morador":"Micaelle e Felipe","vaga":"55"},"BL2-204":{"morador":"Amanda e Luan","vaga":"56"},"BL2-301":{"morador":"Renato e Paula","vaga":"57"},"BL2-302":{"morador":"Eduardo e Joana","vaga":"58"},"BL2-303":{"morador":"Letícia Rabelo de Lima","vaga":"59"},"BL2-304":{"morador":"Jéssika e José","vaga":"60"},"BL2-401":{"morador":"Jose Nelio e Edna Stopa","vaga":"61"},"BL2-402":{"morador":"Daniel e Lana","vaga":"62"},"BL2-403":{"morador":"","vaga":"63"},"BL2-404":{"morador":"","vaga":"64"},"BL2-501":{"morador":"Dielly","vaga":"65"},"BL2-502":{"morador":"Vitor Manoel","vaga":"66"},"BL2-503":{"morador":"","vaga":"67"},"BL2-504":{"morador":"Wellington","vaga":"68"},"BL2-601":{"morador":"","vaga":"69"},"BL2-602":{"morador":"","vaga":"70"},"BL2-603":{"morador":"","vaga":"71-IDOSO"},"BL2-604":{"morador":"","vaga":"72-IDOSO"},"BL2-701":{"morador":"","vaga":"73-IDOSO"},"BL2-702":{"morador":"","vaga":"74-IDOSO"},"BL2-703":{"morador":"Gabriela Fernandes","vaga":"75-IDOSO"},"BL2-704":{"morador":"","vaga":"76-IDOSO"},"BL2-801":{"morador":"Emerson e Elisangela","vaga":"77-IDOSO"},"BL2-802":{"morador":"Liliam","vaga":"78-IDOSO"},"BL2-803":{"morador":"","vaga":"79"},"BL2-804":{"morador":"Gabriele e Lucas","vaga":"80"},"BL2-901":{"morador":"","vaga":"81"},"BL2-902":{"morador":"","vaga":"82"},"BL2-903":{"morador":"","vaga":"83"},"BL2-904":{"morador":"","vaga":"84"},"BL2-1001":{"morador":"Wesley & Monique","vaga":"85"},"BL2-1002":{"morador":"","vaga":"86"},"BL2-1003":{"morador":"Jaque e Jose","vaga":"87"},"BL2-1004":{"morador":"","vaga":"88"},"BL2-1101":{"morador":"Beatriz e Jorge","vaga":"89"},"BL2-1102":{"morador":"","vaga":"90"},"BL2-1103":{"morador":"Dayane e Natália","vaga":"91"},"BL2-1104":{"morador":"","vaga":"92"},"BL2-1201":{"morador":"","vaga":"93"},"BL2-1202":{"morador":"","vaga":"94"},"BL2-1203":{"morador":"","vaga":"95"},"BL2-1204":{"morador":"","vaga":"96"},"BL2-1301":{"morador":"Larissa","vaga":"97"},"BL2-1302":{"morador":"Talita e Magno","vaga":"98"},"BL2-1303":{"morador":"","vaga":"99"},"BL2-1304":{"morador":"Ivan e Andresa","vaga":"100"},"BL3-101":{"morador":"","vaga":"101"},"BL3-102":{"morador":"","vaga":"102"},"BL3-103":{"morador":"Cristiano e Luciana","vaga":"103"},"BL3-104":{"morador":"Alessandra","vaga":"104"},"BL3-201":{"morador":"Fernando","vaga":"105"},"BL3-202":{"morador":"","vaga":"106"},"BL3-203":{"morador":"Bianca e Jonatham","vaga":"107"},"BL3-204":{"morador":"","vaga":"108"},"BL3-301":{"morador":"Carlos Henrique","vaga":"109"},"BL3-302":{"morador":"","vaga":"110"},"BL3-303":{"morador":"Luiz Fernando","vaga":"111"},"BL3-304":{"morador":"","vaga":"112"},"BL3-401":{"morador":"Regiane","vaga":"113"},"BL3-402":{"morador":"","vaga":"114"},"BL3-403":{"morador":"Esther e Lucas","vaga":"115"},"BL3-404":{"morador":"Lais e Samuel","vaga":"116"},"BL3-501":{"morador":"","vaga":"117"},"BL3-502":{"morador":"Naiane e Adailson","vaga":"118"},"BL3-503":{"morador":"Felipe vieira","vaga":"119"},"BL3-504":{"morador":"Gizeli e Carlos","vaga":"120"},"BL3-601":{"morador":"","vaga":"121"},"BL3-602":{"morador":"","vaga":"122"},"BL3-603":{"morador":"","vaga":"123"},"BL3-604":{"morador":"","vaga":"124"},"BL3-701":{"morador":"","vaga":"125"},"BL3-702":{"morador":"Pamela","vaga":"126"},"BL3-703":{"morador":"Antonio eJessica","vaga":"127"},"BL3-704":{"morador":"","vaga":"128"},"BL3-801":{"morador":"","vaga":"129"},"BL3-802":{"morador":"Igor e Helen","vaga":"130"},"BL3-803":{"morador":"Cida e Luiz","vaga":"131"},"BL3-804":{"morador":"","vaga":"132"},"BL3-901":{"morador":"","vaga":"133"},"BL3-902":{"morador":"Carlos e Beatriz","vaga":"134"},"BL3-903":{"morador":"Mikalle","vaga":"135"},"BL3-904":{"morador":"","vaga":"136"},"BL3-1001":{"morador":"","vaga":"137"},"BL3-1002":{"morador":"Jaqueline","vaga":"138"},"BL3-1003":{"morador":"","vaga":"139"},"BL3-1004":{"morador":"","vaga":"140"},"BL3-1101":{"morador":"Leandro e Cristiany","vaga":"141"},"BL3-1102":{"morador":"","vaga":"142"},"BL3-1103":{"morador":"","vaga":"143"},"BL3-1104":{"morador":"Anderson e Jussara","vaga":"144"},"BL3-1201":{"morador":"Raisa e Estevão","vaga":"145"},"BL3-1202":{"morador":"Nattan e kimberly","vaga":"146"},"BL3-1203":{"morador":"Daniele Oliveira","vaga":"147"},"BL3-1204":{"morador":"","vaga":"148"},"BL3-1301":{"morador":"Elyermeson e Maria","vaga":"149"},"BL3-1302":{"morador":"","vaga":"150"},"BL3-1303":{"morador":"Rubens Lourenço e Rosângela","vaga":"151"},"BL3-1304":{"morador":"","vaga":"152"}}}
   </script>
 
   <!-- Contatos e telefones: criptografados com AES-256-GCM.
        A chave deriva da senha do síndico (PBKDF2, 200 mil iterações).
        A senha NÃO está armazenada neste arquivo. -->
   <script type="application/json" id="contatos-cifrados">
-{"salt": "gLENFSZ5y/z6RAfNlswGpg==", "iv": "bmx3n0RFLZDAkjXL", "dados": "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"}
+{"salt":"mKg7oNkqOSmhbAFl3JlhCg==","iv":"YEaeuBqf1AuHWAmn","dados":"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"}
   </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 /* Render sob demanda — declarado no topo pois é usado desde a inicialização.
    A cena só desenha quando algo muda; parada, não consome o celular. */
@@ -513,6 +588,7 @@ for (const [bloco, andares] of Object.entries(ANDARES_POR_BLOCO)) {
 }
 
 let CONTATOS = null;      // preenchido somente após decifragem bem-sucedida
+let senhaSessao = null;   // guardada só em memória enquanto o adm está logado
 let adminAtivo = false;
 
 const estaOcupado = d => (d.morador || '').trim() !== '';
@@ -815,6 +891,31 @@ el('puxador').addEventListener('click', () => {
   else if (idAtual) abrirFolha();
 });
 
+/* Reset defensivo: garante que o arquivo exportado sempre abra
+   no estado inicial (portão ativo, adm desligado, nada selecionado). */
+document.body.classList.remove('modo-admin');
+el('portao').classList.remove('fechado');
+el('ficha').classList.remove('ativa');
+el('painel').classList.remove('aberto');
+el('form-senha').classList.remove('aberto');
+el('portao-senha').classList.remove('aberto');
+el('lista-contatos').innerHTML = '';
+el('import-resumo').innerHTML = '';
+el('import-resumo').classList.remove('on');
+el('inp-morador').value = '';
+el('inp-vaga').value = '';
+el('inp-senha').value = '';
+el('portao-inp').value = '';
+
+/* Recalcula a cor da unidade (verde ocupado / amarelo vago) após edição */
+function atualizarCorUnidade(id) {
+  const mesh = meshPorId[id];
+  if (!mesh) return;
+  mesh.userData.corBase = estaOcupado(DADOS_APARTAMENTOS[id]) ? COR_OCUPADO : COR_VAGO;
+  if (mesh !== aptSelecionado) mesh.material.color.setHex(mesh.userData.corBase);
+  solicitarRender();
+}
+
 function atualizarStats() {
   const total = Object.keys(DADOS_APARTAMENTOS).length;
   const ocupadas = Object.values(DADOS_APARTAMENTOS).filter(estaOcupado).length;
@@ -830,6 +931,54 @@ function linkWhatsApp(zap) {
   return 'https://wa.me/' + (s.startsWith('+') ? dig : '55' + dig);
 }
 
+function criarLinhaContato(c) {
+  const row = document.createElement('div');
+  row.className = 'contato-row';
+
+  // Visualização (modo consulta)
+  const info = document.createElement('div');
+  info.className = 'c-info';
+  const nome = document.createElement('div');
+  nome.className = 'c-nome'; nome.textContent = c.nome || '—';
+  const zap = document.createElement('div');
+  zap.className = 'c-zap'; zap.textContent = c.zap || 'sem número';
+  info.append(nome, zap);
+
+  // Edição (modo adm)
+  const edit = document.createElement('div');
+  edit.className = 'c-edit';
+  const iNome = document.createElement('input');
+  iNome.className = 'e-nome'; iNome.placeholder = 'Nome do contato';
+  iNome.value = c.nome || ''; iNome.autocomplete = 'off';
+  const iZap = document.createElement('input');
+  iZap.className = 'e-zap'; iZap.placeholder = 'DDD + número';
+  iZap.value = c.zap || ''; iZap.autocomplete = 'off';
+  edit.append(iNome, iZap);
+
+  const a = document.createElement('a');
+  a.className = 'c-wa'; a.textContent = '💬';
+  a.target = '_blank'; a.rel = 'noopener'; a.title = 'Chamar no WhatsApp';
+
+  const del = document.createElement('button');
+  del.className = 'c-del'; del.type = 'button'; del.textContent = '×';
+  del.title = 'Remover contato';
+  del.onclick = () => row.remove();
+
+  const sync = () => {
+    const url = linkWhatsApp(iZap.value);
+    if (url) { a.href = url; a.classList.remove('off'); }
+    else { a.removeAttribute('href'); a.classList.add('off'); }
+    nome.textContent = iNome.value || '—';
+    zap.textContent = iZap.value || 'sem número';
+  };
+  iZap.addEventListener('input', sync);
+  iNome.addEventListener('input', sync);
+  sync();
+
+  row.append(info, edit, a, del);
+  return row;
+}
+
 function renderContatos(id) {
   const lista = el('lista-contatos');
   const vazio = el('sem-contatos');
@@ -841,25 +990,14 @@ function renderContatos(id) {
     vazio.style.display = 'block';
     return;
   }
-  contatos.forEach(c => {
-    const row = document.createElement('div');
-    row.className = 'contato-row';
-    const info = document.createElement('div');
-    info.className = 'c-info';
-    const nome = document.createElement('div');
-    nome.className = 'c-nome'; nome.textContent = c.nome || '—';
-    const zap = document.createElement('div');
-    zap.className = 'c-zap'; zap.textContent = c.zap || 'sem número';
-    info.append(nome, zap);
-    const a = document.createElement('a');
-    a.className = 'c-wa'; a.textContent = '💬 Chamar';
-    a.target = '_blank'; a.rel = 'noopener';
-    const url = linkWhatsApp(c.zap);
-    if (url) a.href = url; else a.classList.add('off');
-    row.append(info, a);
-    lista.appendChild(row);
-  });
+  contatos.forEach(c => lista.appendChild(criarLinhaContato(c)));
 }
+
+el('btn-add-contato').addEventListener('click', () => {
+  if (!adminAtivo) return;
+  el('sem-contatos').style.display = 'none';
+  el('lista-contatos').appendChild(criarLinhaContato({ nome: '', zap: '' }));
+});
 
 document.addEventListener('apartamento-selecionado', e => {
   idAtual = e.detail.id;
@@ -873,10 +1011,36 @@ document.addEventListener('apartamento-selecionado', e => {
   const st = el('chip-status');
   st.textContent = estaOcupado(d) ? 'OCUPADO' : 'DISPONÍVEL';
   st.className = estaOcupado(d) ? 'ocupado' : 'vago';
-  el('val-morador').textContent = d.morador;
-  el('val-vaga').textContent = d.vaga;
+  el('inp-morador').value = d.morador;
+  el('inp-vaga').value = d.vaga;
   renderContatos(idAtual);
   abrirFolha();
+});
+
+/* Salvar: grava as edições na memória e atualiza cor/status/contadores */
+el('btn-salvar').addEventListener('click', () => {
+  if (!idAtual || !adminAtivo) return;
+  const d = DADOS_APARTAMENTOS[idAtual];
+  d.morador = el('inp-morador').value.trim();
+  d.vaga = el('inp-vaga').value.trim();
+
+  const novos = [...el('lista-contatos').querySelectorAll('.contato-row')]
+    .map(r => ({
+      nome: r.querySelector('.e-nome').value.trim(),
+      zap:  r.querySelector('.e-zap').value.trim()
+    }))
+    .filter(c => c.nome || c.zap);
+  if (novos.length) CONTATOS[idAtual] = novos;
+  else delete CONTATOS[idAtual];
+
+  atualizarCorUnidade(idAtual);   // verde ↔ amarelo conforme o morador
+  atualizarStats();
+  statsPortao();
+  const st = el('chip-status');
+  st.textContent = estaOcupado(d) ? 'OCUPADO' : 'DISPONÍVEL';
+  st.className = estaOcupado(d) ? 'ocupado' : 'vago';
+  renderContatos(idAtual);
+  mostrarToast(`✓ ${idAtual} salvo — lembre de exportar`);
 });
 
 document.addEventListener('apartamento-desselecionado', () => {
@@ -921,11 +1085,14 @@ async function decifrarContatos(senha) {
   return JSON.parse(new TextDecoder().decode(claro));
 }
 
+const CAMPOS_EDITAVEIS = ['inp-morador', 'inp-vaga'];
+
 function aplicarModo() {
   document.body.classList.toggle('modo-admin', adminAtivo);
+  CAMPOS_EDITAVEIS.forEach(id => { el(id).readOnly = !adminAtivo; });
   el('link-admin').innerHTML = adminAtivo
-    ? '🔓 Área do síndico ativa — clique para sair'
-    : '🔒 Área do síndico';
+    ? '🔓 Área adm ativa — clique para sair'
+    : '🔒 Área adm';
 }
 aplicarModo();
 
@@ -933,6 +1100,7 @@ el('link-admin').addEventListener('click', () => {
   if (adminAtivo) {
     adminAtivo = false;
     CONTATOS = null;   // descarta os dados decifrados da memória
+    senhaSessao = null;
     aplicarModo();
     if (idAtual) renderContatos(idAtual);
     mostrarToast('Sessão encerrada');
@@ -952,6 +1120,7 @@ async function tentarLogin() {
   btn.disabled = true; btn.textContent = '...';
   try {
     CONTATOS = await decifrarContatos(inp.value);
+    senhaSessao = inp.value;      // mantida só em memória, p/ recriptografar no export
     adminAtivo = true;
     inp.value = '';
     el('form-senha').classList.remove('aberto');
@@ -968,6 +1137,243 @@ async function tentarLogin() {
 }
 el('btn-entrar').addEventListener('click', tentarLogin);
 el('inp-senha').addEventListener('keydown', e => { if (e.key === 'Enter') tentarLogin(); });
+
+const bytesParaB64 = b => btoa(String.fromCharCode(...new Uint8Array(b)));
+
+/* Deriva a chave AES a partir da senha (mesmo esquema da decifragem) */
+async function derivarChave(senha, salt, usos) {
+  const material = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(senha), 'PBKDF2', false, ['deriveKey']
+  );
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: 200000, hash: 'SHA-256' },
+    material, { name: 'AES-GCM', length: 256 }, false, usos
+  );
+}
+
+/* Cifra os contatos com salt e IV novos a cada exportação */
+async function cifrarContatos(senha, obj) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv   = crypto.getRandomValues(new Uint8Array(12));
+  const chave = await derivarChave(senha, salt, ['encrypt']);
+  const dados = await crypto.subtle.encrypt(
+    { name: 'AES-GCM', iv },
+    chave, new TextEncoder().encode(JSON.stringify(obj))
+  );
+  return {
+    salt: bytesParaB64(salt),
+    iv: bytesParaB64(iv),
+    dados: bytesParaB64(dados)
+  };
+}
+
+/* ================================================================
+   7.6 EXPORTAÇÃO — gera um index.html novo com os dados atualizados
+   Os contatos são recriptografados com a mesma senha da sessão.
+   O arquivo gerado abre no estado inicial: portão de entrada ativo
+   e modo adm desligado.
+   ================================================================ */
+el('btn-exportar').addEventListener('click', async () => {
+  if (!adminAtivo || !senhaSessao) return;
+  const btn = el('btn-exportar');
+  btn.disabled = true;
+  const rotulo = btn.textContent;
+  btn.textContent = 'Gerando...';
+  try {
+    if (idAtual) el('btn-salvar').click();   // grava edições pendentes
+
+    const publicoJson = JSON.stringify({
+      apartamentos: Object.fromEntries(
+        Object.entries(DADOS_APARTAMENTOS).map(([id, d]) => [id, { morador: d.morador, vaga: d.vaga }])
+      )
+    }).replace(/<\//g, '<\\/');
+
+    const blob = await cifrarContatos(senhaSessao, CONTATOS);
+    const cifradoJson = JSON.stringify(blob).replace(/<\//g, '<\\/');
+
+    // Clona a página e devolve o clone ao estado inicial
+    const c = document.documentElement.cloneNode(true);
+    const q = s => c.querySelector(s);
+    q('body').classList.remove('modo-admin');
+    q('#portao').classList.remove('fechado');
+    q('#portao-passo').innerHTML = '';
+    q('#portao-stats').innerHTML = '';
+    q('#portao-senha').classList.remove('aberto');
+    q('#portao-voltar').setAttribute('hidden', '');
+    q('#lista-contatos').innerHTML = '';
+    q('#import-resumo').innerHTML = '';
+    q('#import-resumo').classList.remove('on');
+    q('#ficha').classList.remove('ativa');
+    q('#painel').classList.remove('aberto');
+    q('#form-senha').classList.remove('aberto');
+    q('#toast').textContent = '';
+    q('#toast').classList.remove('show');
+    q('#sem-contatos').removeAttribute('style');
+    q('#estado-vazio').removeAttribute('style');
+    // Dados novos gravados nas tags JSON
+    q('#dados-publicos').textContent = '\n' + publicoJson + '\n  ';
+    q('#contatos-cifrados').textContent = '\n' + cifradoJson + '\n  ';
+
+    const html = '<!DOCTYPE html>\n' + c.outerHTML;
+    const arquivo = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(arquivo);
+    a.download = 'index.html';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+    mostrarToast('⬇ index.html gerado — suba no GitHub');
+  } catch (err) {
+    mostrarToast('Erro ao exportar: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = rotulo;
+  }
+});
+
+/* ================================================================
+   7.4 IMPORTAÇÃO DE PLANILHA (.xlsx / .csv)
+   Lê a planilha no próprio navegador e atualiza tudo de uma vez:
+   moradores, vagas, contatos, cores do 3D e contadores.
+   Colunas reconhecidas (em qualquer ordem, com ou sem acento):
+   BLOCO+UNIDADE | Bloco | Apartamento | NOME DO MORADOR | Contato | VAGA
+   ================================================================ */
+const semAcento = s => String(s || '').normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '').trim().toUpperCase();
+
+/* Converte célula em texto limpo (números do Excel viram string sem ,0) */
+function celula(v) {
+  if (v === null || v === undefined) return '';
+  if (typeof v === 'number') return String(Math.round(v));
+  return String(v).trim();
+}
+
+function acharColuna(cabecalhos, alternativas) {
+  for (const alvo of alternativas) {
+    const i = cabecalhos.findIndex(h => semAcento(h) === alvo);
+    if (i !== -1) return i;
+  }
+  for (const alvo of alternativas) {           // tolerante: por conteúdo
+    const i = cabecalhos.findIndex(h => semAcento(h).includes(alvo));
+    if (i !== -1) return i;
+  }
+  return -1;
+}
+
+/* Normaliza o SKU para o padrão interno: "BL3-104" */
+function normalizarSku(txt, bloco, apto) {
+  const s = semAcento(txt).replace(/\s+/g, '');
+  const m = s.match(/BL?(\d)[^\d]*(\d{3,4})/);
+  if (m) return `BL${m[1]}-${m[2]}`;
+  if (bloco && apto) return `BL${parseInt(bloco, 10)}-${parseInt(apto, 10)}`;
+  return null;
+}
+
+function unidadeValida(id) {
+  const m = id.match(/^BL(\d)-(\d{3,4})$/);
+  if (!m) return false;
+  const bloco = +m[1], apt = +m[2];
+  const andar = Math.floor(apt / 100), final = apt % 100;
+  return ANDARES_POR_BLOCO[bloco] !== undefined
+      && andar >= 1 && andar <= ANDARES_POR_BLOCO[bloco]
+      && final >= 1 && final <= 4;
+}
+
+el('btn-importar').addEventListener('click', () => {
+  if (!adminAtivo) return;
+  el('arq-planilha').click();
+});
+
+el('arq-planilha').addEventListener('change', async e => {
+  const arq = e.target.files && e.target.files[0];
+  e.target.value = '';                    // permite reimportar o mesmo arquivo
+  if (!arq || !adminAtivo) return;
+  if (typeof XLSX === 'undefined') {
+    mostrarResumo(false, 'Biblioteca de planilhas não carregou. Verifique a internet e recarregue a página.');
+    return;
+  }
+  try {
+    const buf = await arq.arrayBuffer();
+    const wb = XLSX.read(buf, { type: 'array' });
+    const aba = wb.Sheets[wb.SheetNames[0]];
+    const linhas = XLSX.utils.sheet_to_json(aba, { header: 1, blankrows: false, defval: '' });
+    if (linhas.length < 2) throw new Error('A planilha parece vazia.');
+
+    const cab = linhas[0];
+    const cSku     = acharColuna(cab, ['BLOCO+UNIDADE', 'SKU', 'CODIGO']);
+    const cBloco   = acharColuna(cab, ['BLOCO']);
+    const cApto    = acharColuna(cab, ['APARTAMENTO', 'APTO', 'UNIDADE']);
+    const cMorador = acharColuna(cab, ['NOME DO MORADOR', 'MORADOR', 'NOME']);
+    const cContato = acharColuna(cab, ['CONTATO', 'WHATSAPP', 'TELEFONE']);
+    const cVaga    = acharColuna(cab, ['VAGA', 'GARAGEM']);
+
+    if (cSku === -1 && (cBloco === -1 || cApto === -1))
+      throw new Error('Não encontrei a coluna BLOCO+UNIDADE (nem Bloco + Apartamento).');
+    if (cMorador === -1)
+      throw new Error('Não encontrei a coluna NOME DO MORADOR.');
+
+    let atualizadas = 0, comContato = 0;
+    const ignoradas = [];
+
+    for (let i = 1; i < linhas.length; i++) {
+      const L = linhas[i];
+      if (!L || L.every(c => celula(c) === '')) continue;
+      const id = normalizarSku(
+        cSku !== -1 ? celula(L[cSku]) : '',
+        cBloco !== -1 ? celula(L[cBloco]) : '',
+        cApto  !== -1 ? celula(L[cApto])  : ''
+      );
+      if (!id || !unidadeValida(id) || !DADOS_APARTAMENTOS[id]) {
+        ignoradas.push(celula(L[cSku !== -1 ? cSku : 0]) || `linha ${i + 1}`);
+        continue;
+      }
+      const morador = cMorador !== -1 ? celula(L[cMorador]) : '';
+      const vaga    = cVaga    !== -1 ? celula(L[cVaga])    : DADOS_APARTAMENTOS[id].vaga;
+      const zap     = cContato !== -1 ? celula(L[cContato]) : '';
+
+      DADOS_APARTAMENTOS[id].morador = morador;
+      DADOS_APARTAMENTOS[id].vaga = vaga;
+      if (morador && zap) { CONTATOS[id] = [{ nome: morador, zap }]; comContato++; }
+      else delete CONTATOS[id];
+      atualizadas++;
+    }
+
+    reindexarTudo();
+
+    let ocp = 0;
+    Object.values(DADOS_APARTAMENTOS).forEach(d => { if (estaOcupado(d)) ocp++; });
+    const total = Object.keys(DADOS_APARTAMENTOS).length;
+    mostrarResumo(true,
+      `<b class="ok">✓ ${atualizadas} unidades atualizadas</b><br>` +
+      `${ocp} ocupadas · ${total - ocp} disponíveis · ${comContato} com WhatsApp` +
+      (ignoradas.length
+        ? `<br><b class="warn">⚠ ${ignoradas.length} linha(s) ignorada(s):</b> ` +
+          escapeHtml(ignoradas.slice(0, 6).join(', ')) + (ignoradas.length > 6 ? '…' : '')
+        : '') +
+      `<br><b>Agora clique em Exportar</b> para publicar.`);
+    mostrarToast(`✓ Planilha importada: ${atualizadas} unidades`);
+  } catch (err) {
+    mostrarResumo(false, 'Erro ao ler a planilha: ' + escapeHtml(err.message));
+  }
+});
+
+function mostrarResumo(ok, html) {
+  const r = el('import-resumo');
+  r.innerHTML = ok ? html : `<b class="warn">⚠ ${html}</b>`;
+  r.classList.add('on');
+}
+
+/* Recalcula cores, contadores e a ficha aberta após uma importação */
+function reindexarTudo() {
+  Object.keys(DADOS_APARTAMENTOS).forEach(atualizarCorUnidade);
+  atualizarStats();
+  statsPortao();
+  if (idAtual) {
+    document.dispatchEvent(new CustomEvent('apartamento-selecionado', { detail: { id: idAtual } }));
+  }
+  solicitarRender();
+}
 
 /* ================================================================
    7.5 PORTÃO DE ENTRADA — triagem de moradores
@@ -1116,6 +1522,7 @@ async function loginPortao() {
   if (!window.crypto || !crypto.subtle) { mostrarToast('Navegador sem suporte a criptografia'); return; }
   try {
     CONTATOS = await decifrarContatos(inp.value);
+    senhaSessao = inp.value;      // mantida só em memória
     adminAtivo = true;
     inp.value = '';
     aplicarModo();
@@ -1160,5 +1567,6 @@ atualizarCamera();
 // Garante um render após as fontes carregarem (rótulos dos blocos)
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(solicitarRender);
 </script>
-</body>
-</html>
+
+
+</body></html>
